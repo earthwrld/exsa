@@ -1,0 +1,65 @@
+sudo hostnamectl set-hostname machine1.pcteam.id --static
+
+
+sudo groupadd pcteam
+
+sudo useradd -m -G pcteam kelvin
+sudo useradd -m -G pcteam -u 1999 ruben
+sudo useradd -M -s /usr/sbin/nologin fathur
+echo "sysadmin" | sudo passwd --stdin kelvin
+echo "sysadmin" | sudo passwd --stdin ruben
+echo "sysadmin" | sudo passwd --stdin fathur
+
+sudo mkdir -p /shared/pcteam
+sudo chown :pcteam /shared/pcteam
+sudo chmod 2770 /shared/pcteam
+
+sudo chmod g+s /shared/pcteam
+
+%pcteam ALL=(ALL) NOPASSWD: ALL
+
+sudo apt-get install ntp -y
+sudo nano /etc/ntp.conf
+server time.cloudflare.com iburst
+sudo systemctl restart ntp
+ntpq -p
+
+grep /bin/bash /etc/passwd > /root/search.txt
+find /usr/share -name "*.txt" | tar -czvf /root/archive.tar.gz -T -
+
+sudo crontab -u ruben -e
+50 23 * * 1,4 /etc/test.sh
+
+/mnt /etc/auto.pcteam --timeout=60
+sudo nano /etc/auto.pcteam
+pcteam -rw,soft,intr 192.168.100.5:/mnt/pcteam
+
+sudo nano /usr/local/bin/countword
+#!/bin/bash
+echo -n "Enter: "
+read input
+count=$(echo $input | wc -w)
+echo "Count: $count"
+sudo chmod +x /usr/local/bin/countword
+sudo nano /root/snakeoil.sh
+
+sudo apt-get install docker.io -y
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo mkdir -p /opt/pcteamwebapp/templates
+sudo nano /opt/pcteamwebapp/main.py
+sudo nano /opt/pcteamwebapp/templates/index.html
+sudo nano /opt/pcteamwebapp/Dockerfile
+sudo docker build -t pcteam:latest /opt/pcteamwebapp
+sudo docker tag pcteam:latest machine1.pcteam.id:5000/pcteam:2.0
+sudo docker push machine1.pcteam.id:5000/pcteam:2.0
+sudo docker run -d --restart always -p 80:8080 pcteam:latest
+
+sudo pvcreate /dev/vdb2
+sudo pvcreate /dev/vdb3
+sudo vgcreate pcteam /dev/vdb2 /dev/vdb3
+sudo lvcreate -L 500M -n sysadmin pcteam
+sudo mkfs.ext4 /dev/pcteam/sysadmin
+sudo mkdir /mnt/pcteam-storage
+sudo mount /dev/pcteam/sysadmin /mnt/pcteam-storage
+echo '/dev/pcteam/sysadmin /mnt/pcteam-storage ext4 defaults 0 0' | sudo tee -a /etc/fstab
