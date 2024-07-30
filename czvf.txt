@@ -50,6 +50,12 @@ sudo mkdir -p /opt/pcteamwebapp/templates
 sudo nano /opt/pcteamwebapp/main.py
 sudo nano /opt/pcteamwebapp/templates/index.html
 sudo nano /opt/pcteamwebapp/Dockerfile
+FROM python:3.8-slim
+WORKDIR /opt/pcteamwebapp
+COPY . .
+RUN pip install flask
+EXPOSE 8080
+CMD ["python", "main.py"]
 sudo docker build -t pcteam:latest /opt/pcteamwebapp
 sudo docker tag pcteam:latest machine1.pcteam.id:5000/pcteam:2.0
 sudo docker push machine1.pcteam.id:5000/pcteam:2.0
